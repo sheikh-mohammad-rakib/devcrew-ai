@@ -9,12 +9,10 @@ from devcrew_api.services.workspace_service import (
     WorkspaceNotFoundError,
     WorkspaceService,
     WorkspaceServiceError,
-    WorkspaceSlugConflictError,
 )
 
 __all__: list[str] = [
     "WorkspaceNotFoundError",
     "WorkspaceService",
     "WorkspaceServiceError",
-    "WorkspaceSlugConflictError",
 ]

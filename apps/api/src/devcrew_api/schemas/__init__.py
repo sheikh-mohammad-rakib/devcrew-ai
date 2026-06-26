@@ -4,14 +4,9 @@ Re-exporting schemas from this package keeps import paths stable as the
 schema layer grows.
 """
 
-from devcrew_api.schemas.workspace import (
-    WorkspaceCreate,
-    WorkspaceRead,
-    WorkspaceUpdate,
-)
+from devcrew_api.schemas.workspace import WorkspaceCreate, WorkspaceRead
 
 __all__: list[str] = [
     "WorkspaceCreate",
     "WorkspaceRead",
-    "WorkspaceUpdate",
 ]
