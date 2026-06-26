@@ -64,9 +64,13 @@ config.set_main_option("sqlalchemy.url", _settings.database_url)
 # ``Base.metadata`` aggregates every table defined on classes that inherit
 # from ``Base`` (via the project's mixins). Importing model modules here
 # ensures their tables are registered before autogenerate inspects the
-# metadata. Right now there are no application models yet, but the import
-# hook is in place so future modules only need to add a line below.
+# metadata. Add new model modules below as the schema grows.
+#
+# Each import has the side-effect of attaching a ``Table`` to
+# ``Base.metadata``, so we keep them as bare imports (the ``# noqa: F401``
+# silences the "unused import" linter check).
 from devcrew_api.db.base import Base as _BaseForAutogen  # noqa: E402,F401
+from devcrew_api.models.workspace import Workspace  # noqa: E402,F401
 
 target_metadata = _BaseForAutogen.metadata
 

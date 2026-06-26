@@ -51,10 +51,10 @@ class UUIDPrimaryKeyMixin:
     * ``default=uuid.uuid4`` generates the value in Python on INSERT —
       this works across all databases without requiring server-side
       extensions like ``uuid-ossp`` or ``pgcrypto``.
-    * ``primary_key=True`` + ``unique=True`` (implicit on PK) make the
-      column the row identity.
-    * ``nullable=False`` is implicit for primary keys but stated here
-      for clarity.
+    * ``primary_key=True`` already implies uniqueness and
+      ``nullable=False``; declaring them again would only confuse
+      Alembic's autogenerate (it would emit a redundant
+      ``UniqueConstraint``), so we leave them implicit.
     * The column is typed as native PostgreSQL ``UUID`` on PostgreSQL
       and falls back to a portable string-like representation on other
       dialects thanks to SQLAlchemy's dialect-aware type resolution.
@@ -64,8 +64,6 @@ class UUIDPrimaryKeyMixin:
         PG_UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
-        nullable=False,
-        unique=True,
     )
 
 
