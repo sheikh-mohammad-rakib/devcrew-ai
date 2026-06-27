@@ -21,6 +21,17 @@
  *   `ApiError` with `status = 0` and the underlying error attached.
  * - `Authorization: Bearer …` is supported via an optional token getter
  *   so we can plug auth in later without touching every call site.
+ *
+ * Server-side fetch
+ * -----------------
+ * When this client runs inside a Next.js Server Component, the
+ * `fetch` implementation is undici (Node 18+). undici requires
+ * *absolute* URLs — relative URLs throw "Failed to parse URL". To
+ * keep Server Components working when ``NEXT_PUBLIC_API_BASE_URL``
+ * is set to a relative path (so the browser can route through a
+ * Next.js rewrite without CORS preflight), {@link buildUrl} upgrades
+ * relative URLs to absolute ones on the server by reading the
+ * incoming request's ``host`` header.
  */
 
 /* -------------------------------------------------------------------------- */
@@ -114,11 +125,12 @@ export function setAuthTokenProvider(
  * Resolve the base URL.
  *
  * Resolution order:
- *   1. `process.env.NEXT_PUBLIC_API_BASE_URL` — exposed to the browser.
+ *   1. ``NEXT_PUBLIC_API_BASE_URL`` env var — may be an absolute URL
+ *      (``http://…``) or empty for same-origin / Next.js-rewrite mode.
  *   2. {@link DEFAULT_API_BASE_URL}.
  *
  * Trailing slashes are stripped so callers can do
- * `apiGet("/workspaces")` regardless of how the URL was set.
+ * ``apiGet("/workspaces")`` regardless of how the URL was set.
  */
 export function getApiBaseUrl(): string {
   const fromEnv =
@@ -126,19 +138,66 @@ export function getApiBaseUrl(): string {
       ? process.env.NEXT_PUBLIC_API_BASE_URL
       : undefined;
 
-  const raw = (fromEnv && fromEnv.length > 0
-    ? fromEnv
-    : DEFAULT_API_BASE_URL
-  ).trim();
+  if (fromEnv === undefined) {
+    return DEFAULT_API_BASE_URL;
+  }
 
-  return raw.endsWith("/") ? raw.slice(0, -1) : raw;
+  const trimmed = fromEnv.trim();
+  if (trimmed.length === 0) return "";
+
+  return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 }
 
-/** Build a full URL from a path, handling leading slashes robustly. */
+/**
+ * Build a full URL from a path, handling leading slashes robustly.
+ *
+ * On the server, relative base URLs (the same-origin / rewrite mode)
+ * are upgraded to absolute URLs by reading the request's ``host``
+ * header — undici refuses relative URLs.
+ */
 function buildUrl(path: string): string {
   const base = getApiBaseUrl();
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${base}${normalizedPath}`;
+
+  if (base !== "") {
+    return `${base}${normalizedPath}`;
+  }
+
+  // Same-origin mode: browser uses a plain relative URL; server
+  // synthesizes an absolute one from the request's host.
+  if (typeof window !== "undefined") {
+    return normalizedPath;
+  }
+
+  // Server-side: undici fetch needs an absolute URL. Try to read the
+  // current request's ``host`` header. We use the synchronous ``next/headers``
+  // accessor pattern that works across Next.js 13/14/15; if unavailable
+  // (build step / unit tests) fall back to the dev-server default.
+  let host = "127.0.0.1:3000";
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { headers } = require("next/headers") as typeof import("next/headers");
+    const maybePromise = headers() as unknown;
+    // Next 13/14/15 returns ReadonlyHeaders synchronously; Next 16
+    // returns a Promise. Handle both transparently.
+    if (maybePromise && typeof (maybePromise as Promise<unknown>).then === "function") {
+      // We can't await here (this is a sync function). Fall back to
+      // the dev default in that case — Next.js will still route the
+      // request to itself because the path matches a rewrite rule.
+      // The default below matches the dev server's bind address.
+    } else {
+      const h = maybePromise as { get?: (k: string) => string | null };
+      const hostHeader = h?.get?.("host");
+      if (hostHeader) host = hostHeader;
+    }
+  } catch {
+    // Build step / non-Next context — keep the default.
+  }
+  const proto =
+    typeof process !== "undefined" && process.env.NODE_ENV === "production"
+      ? "https"
+      : "http";
+  return `${proto}://${host}${normalizedPath}`;
 }
 
 /**

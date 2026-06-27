@@ -6,10 +6,13 @@
  * code and no client-side hooks, so it can be safely rendered on the
  * server with no hydration mismatch concerns.
  *
- * Visual styling is byte-identical to the pre-refactor implementation
- * that lived in `app/page.tsx`.
+ * The page header always shows a "New Workspace" trigger that opens the
+ * {@link CreateWorkspaceDialog}. The same trigger is duplicated inside
+ * the empty state so a brand-new user can recover from "No workspaces
+ * yet" without scrolling.
  */
 
+import { CreateWorkspaceDialog } from "@/features/workspace/components/create-workspace-dialog";
 import type { FetchResult, Workspace } from "@/features/workspace/types";
 
 /* -------------------------------------------------------------------------- */
@@ -53,9 +56,11 @@ function EmptyState() {
     >
       <h2 className="font-medium">No workspaces yet</h2>
       <p className="text-muted-foreground mt-1 text-sm">
-        Workspaces you create will appear here. Creation will land in the
-        next sprint.
+        Workspaces you create will appear here.
       </p>
+      <div className="mt-4 flex justify-center">
+        <CreateWorkspaceDialog />
+      </div>
     </div>
   );
 }
@@ -104,14 +109,20 @@ function ErrorState({
 export function WorkspacesPageView({ result }: { result: FetchResult }) {
   return (
     <main className="mx-auto min-h-svh w-full max-w-3xl px-6 py-12">
-      <header className="mb-8 flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Workspaces
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Top-level DevCrew engagements. Create, edit, and delete are
-          coming in a follow-up sprint.
-        </p>
+      <header className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Workspaces
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Top-level DevCrew engagements.
+          </p>
+        </div>
+        <div className="shrink-0">
+          {/* Hide the header CTA while we're showing an error — it
+              would just produce another failed request. */}
+          {result.kind !== "error" ? <CreateWorkspaceDialog /> : null}
+        </div>
       </header>
 
       <section aria-label="Workspace list">
