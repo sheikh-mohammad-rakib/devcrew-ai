@@ -33,7 +33,7 @@
  * delete helpers will be added when those UI affordances land.
  */
 
-import { apiGet, apiPost } from "./client";
+import { apiGet, apiPatch, apiPost, apiDelete } from "./client";
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                       */
@@ -50,6 +50,25 @@ export interface ProjectCreateInput {
    * :class:`ProjectStatus` enum value (`planned`, `active`, `paused`,
    * `completed`, `archived`). Omit to let the backend default to
    * `planned`.
+   */
+  status?: string;
+}
+
+/**
+ * Payload accepted by `PATCH /api/v1/projects/{project_id}`.
+ *
+ * All fields are optional — the backend applies a partial update
+ * (only the fields present are changed). To explicitly clear the
+ * description, pass ``description: null``.
+ */
+export interface ProjectUpdateInput {
+  /** New display name (1–100 chars). */
+  name?: string;
+  /** New description, or ``null`` to clear. */
+  description?: string | null;
+  /**
+   * New lifecycle status. Accepts any of the backend enum values
+   * (`planned`, `active`, `paused`, `completed`, `archived`).
    */
   status?: string;
 }
@@ -130,4 +149,40 @@ export function createProjectForWorkspace(
 export function getProject(projectId: string): Promise<Project> {
   const safeId = encodeURIComponent(projectId);
   return apiGet<Project>(`/api/v1/projects/${safeId}`);
+}
+
+/**
+ * Update a project's mutable fields (partial update).
+ *
+ * Only the fields present on ``input`` are sent to the backend; the
+ * others remain unchanged. The backend's PATCH semantics mirror this
+ * (FastAPI ``model_dump(exclude_unset=True)``).
+ *
+ * @throws {ApiError} with ``status === 404`` if the project does not
+ *   exist; ``status === 422`` on validation failure.
+ */
+export function updateProject(
+  projectId: string,
+  input: ProjectUpdateInput,
+): Promise<Project> {
+  const safeId = encodeURIComponent(projectId);
+  return apiPatch<Project, ProjectUpdateInput>(
+    `/api/v1/projects/${safeId}`,
+    input,
+  );
+}
+
+/**
+ * Delete a project.
+ *
+ * Returns ``void`` — the backend responds with ``204 No Content`` on
+ * success. Callers that don't care about the response body should
+ * just ``await`` this and continue.
+ *
+ * @throws {ApiError} with ``status === 404`` if the project does not
+ *   exist.
+ */
+export function deleteProject(projectId: string): Promise<void> {
+  const safeId = encodeURIComponent(projectId);
+  return apiDelete<void>(`/api/v1/projects/${safeId}`);
 }

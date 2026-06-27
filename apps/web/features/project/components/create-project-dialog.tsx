@@ -48,6 +48,9 @@ import {
   DialogTrigger,
 } from "@workspace/ui/components/dialog"
 
+import {
+  badgeStatusToBackendStatus,
+} from "@/features/project/status"
 import type { WorkspaceContext } from "@/features/project/types"
 
 /* -------------------------------------------------------------------------- */
@@ -179,6 +182,11 @@ export function CreateProjectDialog({ workspace }: CreateProjectDialogProps) {
       await createProjectForWorkspace(workspace.id, {
         name: form.name.trim(),
         description: form.description.trim() || null,
+        // New projects start in PLANNING. Map through the same
+        // bridge that the badge uses, then forward the backend's
+        // lowercase enum value to the API. If the bridge is ever
+        // renamed, this call site doesn't need to change.
+        status: badgeStatusToBackendStatus("PLANNING"),
       })
       // Success — close and ask Next.js to re-render the page.
       setOpen(false)

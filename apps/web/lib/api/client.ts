@@ -374,3 +374,34 @@ export function apiPost<TResponse, TBody = unknown>(
 ): Promise<TResponse> {
   return apiFetch<TResponse>(path, { ...options, method: "POST", body });
 }
+
+/**
+ * `PATCH path` with a JSON body.
+ *
+ * @example
+ *   const updated = await apiPatch<Project>("/api/v1/projects/abc", { name: "New" });
+ */
+export function apiPatch<TResponse, TBody = unknown>(
+  path: string,
+  body: TBody,
+  options: Omit<ApiFetchOptions, "method" | "body"> = {},
+): Promise<TResponse> {
+  return apiFetch<TResponse>(path, { ...options, method: "PATCH", body });
+}
+
+/**
+ * `DELETE path` returning the parsed JSON body (often empty).
+ *
+ * The backend typically returns the deleted entity or a status
+ * envelope. Callers that don't care about the body can pass
+ * ``undefined`` as the type parameter.
+ *
+ * @example
+ *   await apiDelete<void>("/api/v1/projects/abc");
+ */
+export function apiDelete<TResponse = unknown>(
+  path: string,
+  options: Omit<ApiFetchOptions, "method" | "body"> = {},
+): Promise<TResponse> {
+  return apiFetch<TResponse>(path, { ...options, method: "DELETE" });
+}

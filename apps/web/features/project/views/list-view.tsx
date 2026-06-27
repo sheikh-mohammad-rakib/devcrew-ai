@@ -47,8 +47,10 @@ import type { LoadProjectsResult } from "@/features/project/types"
 
 function ProjectList({
   projects,
+  workspaceId,
 }: {
   projects: Extract<LoadProjectsResult, { kind: "ok" }>["projects"]
+  workspaceId: string
 }) {
   return (
     <ul
@@ -56,7 +58,11 @@ function ProjectList({
       aria-label={`${projects.length} projects`}
     >
       {projects.map((p) => (
-        <ProjectCard key={p.id} project={p} />
+        <ProjectCard
+          key={p.id}
+          project={p}
+          workspaceId={workspaceId}
+        />
       ))}
     </ul>
   );
@@ -122,7 +128,10 @@ export function ProjectsPageView({ result }: { result: LoadProjectsResult }) {
             }
           />
         ) : (
-          <ProjectList projects={result.projects} />
+          <ProjectList
+            projects={result.projects}
+            workspaceId={result.workspaceId}
+          />
         )}
       </section>
     </div>
