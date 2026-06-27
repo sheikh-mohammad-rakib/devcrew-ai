@@ -1,8 +1,9 @@
 """SQLAlchemy ORM model for the ``Workspace`` aggregate.
 
-This module defines ONLY the Workspace table. It intentionally has no
-relationships and no service-layer glue — those concerns live in their
-own modules.
+This module defines the Workspace table and the parent-side of the
+one-to-many relationship with :class:`Project`. The project-side
+relationship is defined in :mod:`devcrew_api.models.project` and
+references this class via ``back_populates``.
 
 Design notes
 ------------
@@ -16,16 +17,26 @@ Design notes
   display names.
 * ``description`` is optional (``nullable=True``) and unlimited-length
   ``Text`` so users can attach longer briefs.
+* ``projects`` is the inverse side of the ``Workspace → Projects``
+  one-to-many. ``cascade="all, delete-orphan"`` ensures removing a
+  Project from the collection (e.g. via ``workspace.projects.remove(p)``
+  or assigning a new list) deletes the orphan row.
 """
 
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from devcrew_api.db import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    # Imported only for type-checking to avoid a runtime cycle
+    # (``project`` imports ``Workspace`` for ``back_populates``).
+    from devcrew_api.models.project import Project
 
 
 class Workspace(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -42,6 +53,22 @@ class Workspace(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         Text,
         nullable=True,
         default=None,
+    )
+
+    # ----------------------------------------------------------- relationships
+    # The inverse side of ``Project.workspace``. We use the collection
+    # pattern (``List["Project"]``) so future helpers can iterate /
+    # mutate the children in-process if needed.
+    projects: Mapped[List["Project"]] = relationship(
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+        # ``lazy="raise"`` surfaces accidental lazy loads as errors
+        # during development. Endpoints that need the children should
+        # opt-in via an explicit ``selectinload`` in the service.
+        lazy="raise",
+        # Order the collection so callers iterating ``workspace.projects``
+        # see a stable ordering without an explicit ``.order_by(...)``.
+        order_by="Project.created_at.desc()",
     )
 
     def __repr__(self) -> str:  # pragma: no cover - debug helper

@@ -7,10 +7,13 @@
  * shipping any client-side JS.
  *
  * The skeleton renders only the inner content column — the shell's
- * sidebar and header remain mounted around it. Skeleton widths are
- * tuned to match the inner container of the workspace list-view so
- * the page doesn't visibly shift when the real content streams in.
+ * sidebar and header remain mounted around it. We render three card
+ * skeletons (matching the most common list length) plus a placeholder
+ * for the page header so the page doesn't visibly shift when the
+ * real content streams in.
  */
+
+import { LoadingState } from "@/components/shared"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 
 export default function Loading() {
@@ -24,23 +27,7 @@ export default function Loading() {
         <Skeleton className="h-8 w-36" />
       </header>
 
-      <ul
-        className="flex flex-col gap-3"
-        aria-busy="true"
-        aria-label="Loading workspaces"
-      >
-        {Array.from({ length: 3 }).map((_, i) => (
-          <li
-            key={i}
-            className="rounded-lg border bg-card text-card-foreground p-4"
-          >
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-4 w-1/3" />
-              <Skeleton className="h-3 w-2/3" />
-            </div>
-          </li>
-        ))}
-      </ul>
+      <LoadingState count={3} label="Loading workspaces" />
     </div>
   )
 }

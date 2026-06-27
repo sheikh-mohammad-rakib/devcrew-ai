@@ -70,6 +70,7 @@ config.set_main_option("sqlalchemy.url", _settings.database_url)
 # ``Base.metadata``, so we keep them as bare imports (the ``# noqa: F401``
 # silences the "unused import" linter check).
 from devcrew_api.db.base import Base as _BaseForAutogen  # noqa: E402,F401
+from devcrew_api.models.project import Project, ProjectStatus  # noqa: E402,F401
 from devcrew_api.models.workspace import Workspace  # noqa: E402,F401
 
 target_metadata = _BaseForAutogen.metadata
