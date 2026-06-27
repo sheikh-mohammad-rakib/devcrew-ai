@@ -10,6 +10,12 @@ from devcrew_api.services.project_service import (
     ProjectService,
     ProjectServiceError,
 )
+from devcrew_api.services.timeline_service import (
+    TimelineAlreadyExistsError,
+    TimelineNotFoundError,
+    TimelineService,
+    TimelineServiceError,
+)
 from devcrew_api.services.workspace_service import (
     WorkspaceNotFoundError,
     WorkspaceService,
@@ -20,6 +26,10 @@ __all__: list[str] = [
     "ProjectNotFoundError",
     "ProjectService",
     "ProjectServiceError",
+    "TimelineAlreadyExistsError",
+    "TimelineNotFoundError",
+    "TimelineService",
+    "TimelineServiceError",
     "WorkspaceNotFoundError",
     "WorkspaceService",
     "WorkspaceServiceError",

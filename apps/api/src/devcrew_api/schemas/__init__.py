@@ -10,6 +10,13 @@ from devcrew_api.schemas.project import (
     ProjectStatus,
     ProjectUpdate,
 )
+from devcrew_api.schemas.timeline import (
+    TimelineCreate,
+    TimelineRead,
+    TimelineStage,
+    TimelineStatus,
+    TimelineUpdate,
+)
 from devcrew_api.schemas.workspace import WorkspaceCreate, WorkspaceRead
 
 __all__: list[str] = [
@@ -17,6 +24,11 @@ __all__: list[str] = [
     "ProjectRead",
     "ProjectStatus",
     "ProjectUpdate",
+    "TimelineCreate",
+    "TimelineRead",
+    "TimelineStage",
+    "TimelineStatus",
+    "TimelineUpdate",
     "WorkspaceCreate",
     "WorkspaceRead",
 ]

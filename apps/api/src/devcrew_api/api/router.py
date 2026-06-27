@@ -14,6 +14,7 @@ from devcrew_api.api.health import router as health_router
 from devcrew_api.api.v1 import (
     projects_flat_router,
     projects_nested_router,
+    timelines_router,
     workspaces_router,
 )
 
@@ -29,3 +30,5 @@ api_router.include_router(workspaces_router, prefix="/api/v1")
 # (scoped to a workspace) and a flat single-resource route.
 api_router.include_router(projects_nested_router, prefix="/api/v1")
 api_router.include_router(projects_flat_router, prefix="/api/v1")
+# Timelines are nested under projects (1:1 child).
+api_router.include_router(timelines_router, prefix="/api/v1")

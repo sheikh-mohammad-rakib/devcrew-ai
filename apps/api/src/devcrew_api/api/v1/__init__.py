@@ -11,10 +11,12 @@ from devcrew_api.api.v1.projects import (
     flat_router as projects_flat_router,
     nested_router as projects_nested_router,
 )
+from devcrew_api.api.v1.timelines import router as timelines_router
 from devcrew_api.api.v1.workspaces import router as workspaces_router
 
 __all__: list[str] = [
     "projects_flat_router",
     "projects_nested_router",
+    "timelines_router",
     "workspaces_router",
 ]

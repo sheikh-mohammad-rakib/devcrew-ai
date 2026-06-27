@@ -125,6 +125,24 @@ class Project(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         lazy="raise",
     )
 
+    # The parent-side of the one-to-one ``Project → Timeline`` defined
+    # in :mod:`devcrew_api.models.timeline`. ``uselist=False`` is what
+    # tells SQLAlchemy this is a one-to-one (and not a collection).
+    #
+    # ``passive_deletes=True`` tells SQLAlchemy to trust the database
+    # to handle the cascade (``ON DELETE CASCADE`` on
+    # ``timelines.project_id``) instead of issuing an UPDATE that
+    # nulls the child's FK before the DELETE. Without this, deleting
+    # the parent ``Project`` raises a ``NOT NULL`` violation when
+    # SQLAlchemy tries to set the child's ``project_id`` to ``None``
+    # before the cascade fires.
+    timeline: Mapped["Timeline | None"] = relationship(  # noqa: F821
+        back_populates="project",
+        uselist=False,
+        lazy="raise",
+        passive_deletes=True,
+    )
+
     def __repr__(self) -> str:  # pragma: no cover - debug helper
         return (
             f"<Project id={self.id} workspace_id={self.workspace_id} "
