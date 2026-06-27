@@ -6,6 +6,15 @@
  * code and no client-side hooks, so it can be safely rendered on the
  * server with no hydration mismatch concerns.
  *
+ * Chrome
+ * ------
+ * This view renders only the inner content column — no outer
+ * `<main>` / page chrome. The shell layout (`app/(app)/layout.tsx`)
+ * owns the surrounding sidebar + header, so the view focuses on the
+ * workspace list and its own page header. The inner container is
+ * constrained to a comfortable reading width on desktop while still
+ * expanding to the full inset width on narrow viewports.
+ *
  * The page header always shows a "New Workspace" trigger that opens the
  * {@link CreateWorkspaceDialog}. The same trigger is duplicated inside
  * the empty state so a brand-new user can recover from "No workspaces
@@ -108,7 +117,7 @@ function ErrorState({
  */
 export function WorkspacesPageView({ result }: { result: FetchResult }) {
   return (
-    <main className="mx-auto min-h-svh w-full max-w-3xl px-6 py-12">
+    <div className="mx-auto w-full max-w-4xl px-6 py-8">
       <header className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight">
@@ -134,6 +143,6 @@ export function WorkspacesPageView({ result }: { result: FetchResult }) {
           <WorkspaceList workspaces={result.workspaces} />
         )}
       </section>
-    </main>
+    </div>
   );
 }

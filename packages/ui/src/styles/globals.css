@@ -130,3 +130,30 @@
     cursor: pointer;
     }
 }
+
+@layer sidebar {
+  /* Sidebar sizing variables, set on the data-[side] host. */
+  :root {
+    --sidebar-width: 16rem;
+    --sidebar-width-icon: 3rem;
+    --sidebar-width-mobile: 18rem;
+  }
+
+  /* Variant: floating — adds shadow + rounded corners. */
+  [data-slot="sidebar"][data-variant="floating"] {
+    @apply m-2 rounded-lg border bg-sidebar shadow-sm;
+  }
+
+  /* Variant: inset — visually nested inside the page. */
+  [data-slot="sidebar"][data-variant="inset"] {
+    @apply rounded-lg border bg-sidebar;
+  }
+
+  /* Side (left/right) defaults: a fixed-width column with a divider. */
+  [data-slot="sidebar"][data-side="left"] {
+    @apply border-r;
+  }
+  [data-slot="sidebar"][data-side="right"] {
+    @apply border-l;
+  }
+}
