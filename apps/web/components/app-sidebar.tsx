@@ -61,7 +61,7 @@ interface NavItem {
 const PRIMARY_NAV: ReadonlyArray<NavItem> = [
   { icon: LayoutDashboardIcon, label: "Dashboard", href: "#" },
   { icon: BriefcaseIcon, label: "Workspaces", href: "/" },
-  { icon: GitBranchIcon, label: "Projects", href: "#" },
+  { icon: GitBranchIcon, label: "Projects", href: "/projects" },
   { icon: ClockIcon, label: "Timeline", href: "#" },
   { icon: BotIcon, label: "Agents", href: "#" },
 ]
